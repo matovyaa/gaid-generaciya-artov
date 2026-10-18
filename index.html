@@ -150,7 +150,7 @@
       z-index: 2;
     }
 
-    /* Вертикальная линия шагов */
+    /* Вертикальная линия пошаговой инструкции */
     .step-item {
       position: relative;
       padding-left: 2.5rem;
@@ -232,7 +232,7 @@
         </a>
       </nav>
 
-      <!-- Кнопка мобильного меню (телефоны и планшеты) -->
+      <!-- Кнопка мобильного меню -->
       <button id="mobile-menu-btn" aria-label="Открыть меню" class="lg:hidden p-2.5 rounded-lg text-gray-300 hover:text-white hover:bg-white/10 transition">
         <svg id="menu-icon-open" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
@@ -310,7 +310,7 @@
           Привет! Я <strong class="text-white">Матти (matovya)</strong>. В этом руководстве я собрала 4 проверенные площадки, где я сама создаю аватарки и видео-обложки для своих персонажей на <a href="https://frendi.ai/user/455adeea-33b7-44a2-a640-89bff5eefd20" target="_blank" rel="noopener noreferrer" class="text-brand-red hover:underline font-semibold">Frendi.ai</a>, а также свои рабочие приёмы, шаблоны промптов и советы по свету и анатомии лица.
         </p>
 
-        <!-- Быстрая навигация по разделам (Pills) -->
+        <!-- Быстрая навигация по разделам -->
         <div class="bg-brand-card/90 border border-brand-border rounded-2xl p-4 sm:p-5">
           <div class="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-3 flex items-center gap-2">
             <svg class="w-4 h-4 text-brand-red flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -451,7 +451,7 @@
             </div>
           </div>
 
-          <!-- Примеры работ Frendi.ai (2 квадратные карточки 1:1 — 0% обрезки) -->
+          <!-- Примеры работ Frendi.ai -->
           <div class="space-y-3 pt-2">
             <div class="flex items-center justify-between gap-2">
               <h3 class="text-xs sm:text-sm font-bold uppercase tracking-wider text-gray-400">Примеры генераций на Frendi.ai (GPT Image 2):</h3>
@@ -546,44 +546,60 @@
             </div>
           </div>
 
-          <!-- Пошаговый разбор режимов -->
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-            <div class="bg-brand-cardAlt border border-brand-border rounded-xl p-5 space-y-3">
-              <div class="flex items-center gap-2 text-brand-red font-bold text-sm uppercase tracking-wider">
-                <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                </svg>
-                <span>Генерация изображений (Image)</span>
+          <!-- Пошаговая инструкция: ИЗОБРАЖЕНИЯ на Arena.ai -->
+          <div class="space-y-4">
+            <h3 class="text-base sm:text-lg font-bold text-white">Как генерировать изображения на Arena.ai пошагово:</h3>
+            <div class="space-y-4">
+              <div class="step-item">
+                <div class="absolute left-0 top-0 w-7 h-7 rounded-lg bg-brand-red text-white font-bold text-xs flex items-center justify-center">1</div>
+                <h4 class="font-semibold text-white text-sm sm:text-base">Включи V*N и выбери вкладку Image</h4>
+                <p class="text-gray-400 text-sm mt-0.5">Зайди на сайт <strong class="text-gray-200">arena.ai</strong> (с включённым V*N) и под строкой ввода промпта нажми на кнопку <strong class="text-gray-200">«Image»</strong>.</p>
               </div>
-              <ul class="space-y-2.5 text-sm text-gray-300">
-                <li>• <strong class="text-white">3 режима сверху:</strong>
-                  <ul class="pl-3 mt-1.5 space-y-1.5 text-gray-400">
-                    <li>— <strong class="text-gray-200">Battle:</strong> две случайные модели генерируют 2 картинки вслепую на выбор.</li>
-                    <li>— <strong class="text-gray-200">Side by Side:</strong> ты сама выбираешь 2 конкретные нейросети и сравниваешь их результат.</li>
-                    <li>— <strong class="text-gray-200">Direct:</strong> генерация одной выбранной моделью.</li>
-                  </ul>
-                </li>
-                <li>• <strong class="text-white">Значок «очков» возле модели:</strong> показывает, что эта нейросеть умеет принимать картинку-референс (через кнопку «+» в поле ввода).</li>
-              </ul>
-            </div>
-
-            <div class="bg-brand-cardAlt border border-brand-border rounded-xl p-5 space-y-3">
-              <div class="flex items-center gap-2 text-brand-red font-bold text-sm uppercase tracking-wider">
-                <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>
-                </svg>
-                <span>Генерация видео (Video)</span>
+              <div class="step-item">
+                <div class="absolute left-0 top-0 w-7 h-7 rounded-lg bg-brand-red text-white font-bold text-xs flex items-center justify-center">2</div>
+                <h4 class="font-semibold text-white text-sm sm:text-base">Выбери один из 3 режимов сверху</h4>
+                <p class="text-gray-400 text-sm mt-0.5">
+                  — <strong class="text-gray-200">Battle:</strong> две случайные модели генерируют 2 картинки вслепую на выбор.<br/>
+                  — <strong class="text-gray-200">Side by Side:</strong> ты сама выбираешь 2 конкретные нейросети из списка и сравниваешь их результат.<br/>
+                  — <strong class="text-gray-200">Direct:</strong> генерация одной выбранной моделью.
+                </p>
               </div>
-              <ul class="space-y-2.5 text-sm text-gray-300">
-                <li>• Нажми на иконку <strong class="text-white">Video</strong> под строкой ввода промпта.</li>
-                <li>• <strong class="text-white">Только в режиме Battle Mode:</strong> генерация видео доступна исключительно в режиме «Battle» (выбрать конкретную видео-модель вручную нельзя).</li>
-                <li>• <strong class="text-white">Оживление фото:</strong> нажми «+», прикрепи готовую аватарку персонажа и напиши на английском, какое движение нужно сделать (например, лёгкая улыбка, ветер в волосах, взгляд в камеру).</li>
-                <li>• <strong class="text-white">Лимит:</strong> бесплатно даётся <strong class="text-gray-200">1 видео-генерация в день</strong> (ролик длится около 5 секунд, сразу в 2 вариантах от двух моделей).</li>
-              </ul>
+              <div class="step-item">
+                <div class="absolute left-0 top-0 w-7 h-7 rounded-lg bg-brand-red text-white font-bold text-xs flex items-center justify-center">3</div>
+                <h4 class="font-semibold text-white text-sm sm:text-base">Проверь значок «очков» для загрузки референса</h4>
+                <p class="text-gray-400 text-sm mt-0.5">Если хочешь прикрепить свою картинку-референс через кнопку <strong class="text-gray-200">«+»</strong>, выбирай модель со <strong class="text-gray-200">значком «очков»</strong> рядом с названием — именно они поддерживают работу с фото.</p>
+              </div>
+              <div class="step-item">
+                <div class="absolute left-0 top-0 w-7 h-7 rounded-lg bg-brand-red text-white font-bold text-xs flex items-center justify-center">4</div>
+                <h4 class="font-semibold text-white text-sm sm:text-base">Отправь промпт на английском языке</h4>
+                <p class="text-gray-400 text-sm mt-0.5">Введи описание на английском языке (можно составить через моего бота-помощника или перевести в переводчике), дождись генерации и сохрани понравившийся арт.</p>
+              </div>
             </div>
           </div>
 
-          <!-- Примеры работ Arena.ai (2 квадратные карточки 1:1 — без обрезки) -->
+          <!-- Пошаговая инструкция: ВИДЕО на Arena.ai -->
+          <div class="space-y-4 pt-2 border-t border-brand-border">
+            <h3 class="text-base sm:text-lg font-bold text-white">Как сгенерировать видео (оживить арт) на Arena.ai пошагово:</h3>
+            <div class="space-y-4">
+              <div class="step-item">
+                <div class="absolute left-0 top-0 w-7 h-7 rounded-lg bg-brand-red text-white font-bold text-xs flex items-center justify-center">1</div>
+                <h4 class="font-semibold text-white text-sm sm:text-base">Переключись в режим Video (только Battle Mode)</h4>
+                <p class="text-gray-400 text-sm mt-0.5">Нажми на иконку <strong class="text-gray-200">«Video»</strong> под строкой ввода. Обрати внимание: генерация видео доступна <strong class="text-gray-200">только в режиме Battle</strong> (выбрать конкретную видео-модель вручную нельзя).</p>
+              </div>
+              <div class="step-item">
+                <div class="absolute left-0 top-0 w-7 h-7 rounded-lg bg-brand-red text-white font-bold text-xs flex items-center justify-center">2</div>
+                <h4 class="font-semibold text-white text-sm sm:text-base">Прикрепи готовую картинку и опиши движение</h4>
+                <p class="text-gray-400 text-sm mt-0.5">Нажми <strong class="text-gray-200">«+»</strong>, загрузи аватарку своего персонажа и напиши на английском, какое движение нужно сделать (например: лёгкая улыбка, ветер в волосах, плавный поворот головы).</p>
+              </div>
+              <div class="step-item">
+                <div class="absolute left-0 top-0 w-7 h-7 rounded-lg bg-brand-red text-white font-bold text-xs flex items-center justify-center">3</div>
+                <h4 class="font-semibold text-white text-sm sm:text-base">Выбери лучший ролик (лимит: 1 раз в день)</h4>
+                <p class="text-gray-400 text-sm mt-0.5">Две модели бесплатно сгенерируют два 5-секундных видео на выбор. Бесплатный лимит платформы — <strong class="text-gray-200">1 видео-генерация в день</strong>.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Примеры работ Arena.ai -->
           <div class="space-y-3 pt-2">
             <div class="flex items-center justify-between gap-2">
               <h3 class="text-xs sm:text-sm font-bold uppercase tracking-wider text-gray-400">Примеры генераций в Arena.ai (один промпт в разных моделях):</h3>
@@ -678,40 +694,42 @@
             </div>
           </div>
 
-          <!-- 2 способа и фишки ChatGPT -->
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-            <div class="bg-brand-cardAlt border border-brand-border rounded-xl p-5 space-y-3">
-              <h3 class="font-bold text-white text-base flex items-center gap-2">
-                <span class="w-2 h-2 rounded-full bg-brand-red flex-shrink-0"></span>
-                <span>Два способа запустить генерацию:</span>
-              </h3>
-              <ul class="space-y-2.5 text-sm text-gray-300">
-                <li>
-                  <strong class="text-white">1. Прямо в обычном чате:</strong> начни своё сообщение со слов <span class="text-brand-red font-semibold">«Создай изображение...»</span> или <span class="text-brand-red font-semibold">«Нарисуй...»</span>, а через кнопку «+» при желании прикрепи фото-референс.
-                </li>
-                <li>
-                  <strong class="text-white">2. Через меню инструментов:</strong> нажми на кнопку <strong class="text-white">«+»</strong> слева от поля ввода и выбери пункт <strong class="text-white">«Создать изображение»</strong> (или открой вкладку «Изображения» в боковой панели).
-                </li>
-              </ul>
-            </div>
-
-            <div class="bg-brand-cardAlt border border-brand-border rounded-xl p-5 space-y-3">
-              <h3 class="font-bold text-white text-base flex items-center gap-2">
-                <span class="w-2 h-2 rounded-full bg-brand-red flex-shrink-0"></span>
-                <span>Как избежать «шаблонных» лиц и править детали:</span>
-              </h3>
-              <ul class="space-y-2.5 text-sm text-gray-300">
-                <li>
-                  • <strong class="text-white">Прописывай анатомию лица:</strong> чтобы ChatGPT не делал одинаковые базовые лица, обязательно уточняй форму скул, разрез глаз, форму носа, губ и челюсти.
-                </li>
-                <li>
-                  • <strong class="text-white">Правки прямо в диалоге:</strong> если арт почти идеальный, просто напиши следом: <em>«Оставь всё так же, но сделай взгляд спокойнее»</em> или <em>«Поменяй цвет рубашки на чёрный»</em>.
-                </li>
-              </ul>
+          <!-- Пошаговая инструкция для ChatGPT -->
+          <div class="space-y-4">
+            <h3 class="text-base sm:text-lg font-bold text-white">Как генерировать изображения в ChatGPT пошагово:</h3>
+            <div class="space-y-4">
+              <div class="step-item">
+                <div class="absolute left-0 top-0 w-7 h-7 rounded-lg bg-brand-red text-white font-bold text-xs flex items-center justify-center">1</div>
+                <h4 class="font-semibold text-white text-sm sm:text-base">Включи V*N и открой чат</h4>
+                <p class="text-gray-400 text-sm mt-0.5">Зайди на сайт <strong class="text-gray-200">chatgpt.com</strong> или в официальное приложение с включённым V*N.</p>
+              </div>
+              <div class="step-item">
+                <div class="absolute left-0 top-0 w-7 h-7 rounded-lg bg-brand-red text-white font-bold text-xs flex items-center justify-center">2</div>
+                <h4 class="font-semibold text-white text-sm sm:text-base">Запусти генерацию одним из 2 способов</h4>
+                <p class="text-gray-400 text-sm mt-0.5">
+                  — <strong class="text-gray-200">Способ 1 (прямо в чате):</strong> начни сообщение с фразы <span class="text-brand-red font-semibold">«Создай изображение...»</span> или <span class="text-brand-red font-semibold">«Нарисуй...»</span>.<br/>
+                  — <strong class="text-gray-200">Способ 2 (через меню):</strong> нажми на кнопку <strong class="text-gray-200">«+»</strong> слева от строки ввода и выбери пункт <strong class="text-gray-200">«Создать изображение»</strong> (или открой вкладку «Изображения» в боковой панели).
+                </p>
+              </div>
+              <div class="step-item">
+                <div class="absolute left-0 top-0 w-7 h-7 rounded-lg bg-brand-red text-white font-bold text-xs flex items-center justify-center">3</div>
+                <h4 class="font-semibold text-white text-sm sm:text-base">Прикрепи фото-референс (по желанию)</h4>
+                <p class="text-gray-400 text-sm mt-0.5">Через кнопку <strong class="text-gray-200">«+»</strong> можно загрузить пример внешности, позы, одежды или цветовой гаммы, на который нейросеть будет опираться.</p>
+              </div>
+              <div class="step-item">
+                <div class="absolute left-0 top-0 w-7 h-7 rounded-lg bg-brand-red text-white font-bold text-xs flex items-center justify-center">4</div>
+                <h4 class="font-semibold text-white text-sm sm:text-base">Подробно пропиши анатомию лица и свет на русском</h4>
+                <p class="text-gray-400 text-sm mt-0.5">Чтобы ChatGPT не выдавал «шаблонные» базовые лица, обязательно уточняй форму скул, разрез глаз, форму носа, губ и челюсти, а также указывай желаемый формат кадра и контрастное освещение.</p>
+              </div>
+              <div class="step-item">
+                <div class="absolute left-0 top-0 w-7 h-7 rounded-lg bg-brand-red text-white font-bold text-xs flex items-center justify-center">5</div>
+                <h4 class="font-semibold text-white text-sm sm:text-base">Вноси правки прямо в диалоге</h4>
+                <p class="text-gray-400 text-sm mt-0.5">ChatGPT <strong class="text-gray-200">помнит контекст беседы</strong>! Если картинка почти идеальна, просто напиши следом: <em>«Оставь всё так же, но сделай взгляд спокойнее»</em> или <em>«Поменяй цвет рубашки на чёрный»</em>.</p>
+              </div>
             </div>
           </div>
 
-          <!-- Примеры работ ChatGPT (2 вертикальные карточки 2:3 — родной формат ChatGPT без обрезки) -->
+          <!-- Примеры работ ChatGPT -->
           <div class="space-y-3 pt-2">
             <div class="flex items-center justify-between gap-2">
               <h3 class="text-xs sm:text-sm font-bold uppercase tracking-wider text-gray-400">Примеры генераций в ChatGPT (сохранение внешности и деталей):</h3>
@@ -822,8 +840,8 @@
               </div>
               <div class="step-item">
                 <div class="absolute left-0 top-0 w-7 h-7 rounded-lg bg-brand-red text-white font-bold text-xs flex items-center justify-center">3</div>
-                <h4 class="font-semibold text-white text-sm sm:text-base">Укажи формат 3:4 и отправь промпт</h4>
-                <p class="text-gray-400 text-sm mt-0.5">Выбери вертикальное соотношение сторон <strong class="text-gray-200">3:4</strong> (идеально под карточку бота) и отправь текст промпта. При желании прикрепи от <strong class="text-gray-200">1 до 4 фото-референсов</strong> одним сообщением с подписью.</p>
+                <h4 class="font-semibold text-white text-sm sm:text-base">Выбери нужный формат и отправь промпт</h4>
+                <p class="text-gray-400 text-sm mt-0.5">Выбери любое подходящее соотношение сторон (например, <strong class="text-gray-200">1:1, 3:4, 9:16 или 16:9</strong> — на схеме для примера выбран 3:4) и отправь текст промпта. При желании прикрепи от <strong class="text-gray-200">1 до 4 фото-референсов</strong> одним сообщением с подписью.</p>
               </div>
               <div class="step-item">
                 <div class="absolute left-0 top-0 w-7 h-7 rounded-lg bg-brand-red text-white font-bold text-xs flex items-center justify-center">4</div>
@@ -833,7 +851,7 @@
             </div>
           </div>
 
-          <!-- Примеры работ TG Bot (Умный контейнер 3:4 без обрезки веера у 1-го арта) -->
+          <!-- Примеры работ TG Bot -->
           <div class="space-y-3 pt-2">
             <div class="flex items-center justify-between gap-2">
               <h3 class="text-xs sm:text-sm font-bold uppercase tracking-wider text-gray-400">Примеры генераций в @GPT4Telegrambot:</h3>
@@ -842,7 +860,6 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div class="art-card" onclick="openLightboxFromBox(this, 'Пример #1 • @GPT4Telegrambot — Детализированный полуреализм с мягким закатным светом')">
                 <div class="art-viewport-smart">
-                  <!-- Размытая атмосферная подложка, чтобы квадратный арт в блоке 3:4 смотрелся без чёрных полос и без обрезки веера -->
                   <img src="tgbot-1.jpg" data-base="tgbot-1" alt="" aria-hidden="true" class="absolute inset-0 w-full h-full object-cover blur-xl opacity-40 scale-110 pointer-events-none" onerror="resolveImage(this)" />
                   <img class="art-main-img-contain" src="tgbot-1.jpg" data-base="tgbot-1" alt="Пример генерации в @GPT4Telegrambot — Полуреализм" onerror="resolveImage(this)" />
                   <div class="absolute top-2.5 right-2.5 z-10 w-8 h-8 rounded-lg bg-black/70 border border-white/15 text-white flex items-center justify-center pointer-events-none">
@@ -857,7 +874,7 @@
                 </div>
               </div>
 
-              <div class="art-card" onclick="openLightboxFromBox(this, 'Пример #2 • @GPT4Telegrambot — Стилизация в духе аниме / манхва семи-реализма (3:4)')">
+              <div class="art-card" onclick="openLightboxFromBox(this, 'Пример #2 • @GPT4Telegrambot — Стилизация в духе аниме / манхва семи-реализма')">
                 <div class="art-viewport-smart">
                   <img class="art-main-img" src="tgbot-2.jpg" data-base="tgbot-2" alt="Пример генерации в @GPT4Telegrambot — Аниме / Манхва семи-реализм" onerror="resolveImage(this)" />
                   <div class="absolute top-2.5 right-2.5 z-10 w-8 h-8 rounded-lg bg-black/70 border border-white/15 text-white flex items-center justify-center pointer-events-none">
@@ -868,7 +885,7 @@
                 </div>
                 <div class="p-3.5 bg-brand-cardAlt border-t border-brand-border">
                   <span class="text-[11px] font-bold text-brand-red uppercase tracking-wider block">Пример #2 • @GPT4Telegrambot</span>
-                  <p class="text-xs sm:text-sm font-medium text-gray-200 mt-0.5">Стилизация в духе аниме / манхва семи-реализма (формат 3:4)</p>
+                  <p class="text-xs sm:text-sm font-medium text-gray-200 mt-0.5">Стилизация в духе аниме / манхва семи-реализма</p>
                 </div>
               </div>
             </div>
@@ -911,9 +928,9 @@
               </p>
             </div>
             <div class="bg-brand-cardAlt border border-brand-border rounded-xl p-5 space-y-2">
-              <div class="text-brand-red font-bold text-sm uppercase tracking-wider">4. Указывай стиль и формат 3:4</div>
+              <div class="text-brand-red font-bold text-sm uppercase tracking-wider">4. Задавай стиль и нужный формат</div>
               <p class="text-gray-300 text-sm leading-relaxed">
-                В самом начале запроса пиши <strong class="text-white">«Создай изображение в формате 3:4»</strong> и задавай стиль: <em>полуреализм (semi-realism), цифровая живопись с видимыми мазками, дарк-фэнтези или кинематографичный портрет</em>.
+                В самом начале запроса задавай стиль (<em>полуреализм, цифровая живопись с видимыми мазками, дарк-фэнтези</em>) и при желании указывай удобное соотношение сторон — например, <strong class="text-white">3:4, 1:1 или 9:16</strong> (в примерах я часто использую 3:4 или 1:1).
               </p>
             </div>
           </div>
@@ -936,7 +953,7 @@
                   <span>Скопировать шаблон</span>
                 </button>
               </div>
-              <pre id="prompt-template-1" class="text-xs sm:text-sm text-gray-300 whitespace-pre-wrap break-words font-mono leading-relaxed bg-brand-card/70 p-3.5 sm:p-4 rounded-lg border border-brand-border/60">Создай изображение в формате 3:4, стиль — детализированный полуреализм (semi-realism). На портрете по пояс изображён [возраст и пол/тип персонажа], [причёска, цвет и длина волос]. Черты лица: [форма скул и челюсти], [разрез и цвет глаз], [форма носа и губ], [особые приметы: веснушки / шрам / родинка]. Выражение лица: [спокойная полуулыбка / задумчивый взгляд], не хмурится, естественная эмоция. Одет в [описание одежды и аксессуаров]. Фон: [описание локации и времени суток]. Освещение: кинематографичный контрастный свет, [тёплый закатный контровой свет по контуру волос / неоновые блики], глубокие мягкие тени на лице, высокая детализация кожи и прядей волос.</pre>
+              <pre id="prompt-template-1" class="text-xs sm:text-sm text-gray-300 whitespace-pre-wrap break-words font-mono leading-relaxed bg-brand-card/70 p-3.5 sm:p-4 rounded-lg border border-brand-border/60">Создай изображение [при желании укажи формат, например: 3:4 или 1:1], стиль — детализированный полуреализм (semi-realism). На портрете по пояс изображён [возраст и пол/тип персонажа], [причёска, цвет и длина волос]. Черты лица: [форма скул и челюсти], [разрез и цвет глаз], [форма носа и губ], [особые приметы: веснушки / шрам / родинка]. Выражение лица: [спокойная полуулыбка / задумчивый взгляд], не хмурится, естественная эмоция. Одет в [описание одежды и аксессуаров]. Фон: [описание локации и времени суток]. Освещение: кинематографичный контрастный свет, [тёплый закатный контровой свет по контуру волос / неоновые блики], глубокие мягкие тени на лице, высокая детализация кожи и прядей волос.</pre>
             </div>
 
             <!-- Шаблон 2 -->
@@ -950,7 +967,7 @@
                   <span>Скопировать шаблон</span>
                 </button>
               </div>
-              <pre id="prompt-template-2" class="text-xs sm:text-sm text-gray-300 whitespace-pre-wrap break-words font-mono leading-relaxed bg-brand-card/70 p-3.5 sm:p-4 rounded-lg border border-brand-border/60">Создай изображение в формате 3:4, художественный полуреализм с мягкой текстурой мазков. В кадре [описание персонажа, его поза и действие, например: сидит на крыше / держит в руках предмет]. Лицо: [чёткие скулы, форма глаз и цвет радужки, форма губ], не хмурится, естественная живая эмоция, взгляд направлен в камеру. Волосы: [цвет и текстура волос, лёгкое движение от ветра]. Одежда: [детали костюма, фактура ткани]. Атмосфера и свет: [закатное небо / сумерки / туман], выразительный контровой свет, тёплые блики на коже и контрастные глубокие тени.</pre>
+              <pre id="prompt-template-2" class="text-xs sm:text-sm text-gray-300 whitespace-pre-wrap break-words font-mono leading-relaxed bg-brand-card/70 p-3.5 sm:p-4 rounded-lg border border-brand-border/60">Создай изображение [при желании укажи формат, например: 3:4 или 1:1], художественный полуреализм с мягкой текстурой мазков. В кадре [описание персонажа, его поза и действие, например: сидит на крыше / держит в руках предмет]. Лицо: [чёткие скулы, форма глаз и цвет радужки, форма губ], не хмурится, естественная живая эмоция, взгляд направлен в камеру. Волосы: [цвет и текстура волос, лёгкое движение от ветра]. Одежда: [детали костюма, фактура ткани]. Атмосфера и свет: [закатное небо / сумерки / туман], выразительный контровой свет, тёплые блики на коже и контрастные глубокие тени.</pre>
             </div>
 
             <!-- Плашка с прямой ссылкой на бота-помощника -->
