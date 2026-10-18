@@ -1,0 +1,1180 @@
+<!DOCTYPE html>
+<html lang="ru" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
+  <title>Гайд по генерации изображений и видео для ботов | Матти (matovya)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              red: '#E50914',
+              redHover: '#F40612',
+              darkRed: '#99060d',
+              black: '#0a0a0a',
+              card: '#141414',
+              cardAlt: '#1a1a1a',
+              border: '#262626'
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    html, body {
+      background-color: #0a0a0a;
+      color: #f3f4f6;
+      font-family: 'Inter', sans-serif;
+      overflow-x: hidden;
+      width: 100%;
+    }
+
+    /* Фоновая сетка */
+    .bg-grid-pattern {
+      background-image: 
+        linear-gradient(to right, rgba(229, 9, 20, 0.05) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(229, 9, 20, 0.05) 1px, transparent 1px);
+      background-size: 36px 36px;
+    }
+
+    /* Неоновое свечение */
+    .red-glow {
+      box-shadow: 0 0 35px -5px rgba(229, 9, 20, 0.35);
+    }
+    .red-glow-sm {
+      box-shadow: 0 0 18px -4px rgba(229, 9, 20, 0.4);
+    }
+
+    /* Контейнер для карточек-гайдов (4:3, 1024x768 без обрезки текста) */
+    .guide-img-box {
+      aspect-ratio: 4 / 3;
+      width: 100%;
+      max-width: 1024px;
+      position: relative;
+      overflow: hidden;
+      border-radius: 0.875rem;
+      background: #0d0d0d;
+      border: 1px solid #2a2a2a;
+      cursor: zoom-in;
+    }
+    .guide-img-box img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      background: #0d0d0d;
+      transition: transform 0.35s ease;
+      display: block;
+    }
+    @media (hover: hover) {
+      .guide-img-box:hover img {
+        transform: scale(1.015);
+      }
+    }
+
+    /* Карточка для примеров генераций */
+    .art-card {
+      display: flex;
+      flex-direction: column;
+      border-radius: 0.875rem;
+      overflow: hidden;
+      background: #161616;
+      border: 1px solid #2a2a2a;
+      cursor: zoom-in;
+      transition: border-color 0.25s ease, transform 0.25s ease;
+    }
+    @media (hover: hover) {
+      .art-card:hover {
+        border-color: rgba(229, 9, 20, 0.6);
+        transform: translateY(-2px);
+      }
+      .art-card:hover .art-main-img {
+        transform: scale(1.03);
+      }
+    }
+
+    .art-viewport-square {
+      aspect-ratio: 1 / 1;
+      width: 100%;
+      position: relative;
+      overflow: hidden;
+      background: #0d0d0d;
+    }
+
+    .art-viewport-portrait {
+      aspect-ratio: 2 / 3;
+      width: 100%;
+      position: relative;
+      overflow: hidden;
+      background: #0d0d0d;
+    }
+
+    .art-viewport-smart {
+      aspect-ratio: 3 / 4;
+      width: 100%;
+      position: relative;
+      overflow: hidden;
+      background: #0d0d0d;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .art-main-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center center;
+      transition: transform 0.4s ease;
+      display: block;
+      position: relative;
+      z-index: 2;
+    }
+
+    .art-main-img-contain {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      transition: transform 0.4s ease;
+      display: block;
+      position: relative;
+      z-index: 2;
+    }
+
+    /* Вертикальная линия шагов */
+    .step-item {
+      position: relative;
+      padding-left: 2.5rem;
+    }
+    .step-item::before {
+      content: '';
+      position: absolute;
+      left: 0.85rem;
+      top: 2rem;
+      bottom: -1rem;
+      width: 2px;
+      background: linear-gradient(to bottom, rgba(229, 9, 20, 0.5), rgba(38, 38, 38, 0.4));
+    }
+    .step-item:last-child::before {
+      display: none;
+    }
+
+    /* Кастомный скроллбар */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #0a0a0a;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #262626;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #E50914;
+    }
+  </style>
+</head>
+<body class="bg-grid-pattern min-h-screen flex flex-col selection:bg-brand-red selection:text-white">
+
+  <!-- Полоса прогресса чтения -->
+  <div id="reading-progress" class="fixed top-0 left-0 h-1 bg-brand-red z-[60] transition-all duration-150" style="width: 0%;"></div>
+
+  <!-- Навигационная панель -->
+  <header class="sticky top-0 z-50 bg-brand-black/90 backdrop-blur-md border-b border-brand-border">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-2">
+      <!-- Логотип -->
+      <a href="#top" onclick="scrollToSection(event, 'top')" class="flex items-center gap-2.5 group flex-shrink-0">
+        <div class="w-9 h-9 rounded-lg bg-brand-red flex items-center justify-center text-white font-black text-lg tracking-tighter red-glow-sm group-hover:bg-brand-redHover transition">
+          M
+        </div>
+        <div class="flex flex-col">
+          <span class="font-extrabold text-white tracking-tight leading-none text-base">MATOVYA</span>
+          <span class="text-[11px] text-gray-400 font-medium tracking-widest uppercase mt-0.5">AI Art & Video Guide</span>
+        </div>
+      </a>
+
+      <!-- Десктопное меню -->
+      <nav class="hidden lg:flex items-center gap-1 xl:gap-2">
+        <a href="#top" onclick="scrollToSection(event, 'top')" class="px-3 py-2 rounded-lg text-sm font-medium text-gray-300 hover:text-white hover:bg-white/5 transition">
+          Главная
+        </a>
+        <a href="#bot-helper" onclick="scrollToSection(event, 'bot-helper')" class="px-3 py-2 rounded-lg text-sm font-medium text-gray-300 hover:text-white hover:bg-white/5 transition flex items-center gap-1.5">
+          <span class="w-2 h-2 rounded-full bg-brand-red animate-pulse"></span>
+          Бот-помощник
+        </a>
+        <a href="https://matovyaa.github.io/gaid-sozdanie-botov/" target="_blank" rel="noopener noreferrer" class="px-3 py-2 rounded-lg text-sm font-medium text-gray-300 hover:text-white hover:bg-white/5 transition flex items-center gap-1">
+          Гайды
+          <svg class="w-3.5 h-3.5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+          </svg>
+        </a>
+        <a href="https://t.me/matovya_creator" target="_blank" rel="noopener noreferrer" class="px-3 py-2 rounded-lg text-sm font-medium text-gray-300 hover:text-white hover:bg-white/5 transition flex items-center gap-1">
+          ТГ канал
+          <svg class="w-3.5 h-3.5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+          </svg>
+        </a>
+        <a href="https://frendi.ai/user/455adeea-33b7-44a2-a640-89bff5eefd20" target="_blank" rel="noopener noreferrer" class="ml-2 px-4 py-2 rounded-lg text-sm font-semibold bg-brand-red hover:bg-brand-redHover text-white red-glow-sm transition flex items-center gap-1.5">
+          <span>Перейти на Frendi.ai</span>
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
+          </svg>
+        </a>
+      </nav>
+
+      <!-- Кнопка мобильного меню (телефоны и планшеты) -->
+      <button id="mobile-menu-btn" aria-label="Открыть меню" class="lg:hidden p-2.5 rounded-lg text-gray-300 hover:text-white hover:bg-white/10 transition">
+        <svg id="menu-icon-open" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+        </svg>
+        <svg id="menu-icon-close" class="w-6 h-6 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Мобильное выпадающее меню -->
+    <div id="mobile-menu" class="hidden lg:hidden bg-brand-card border-b border-brand-border px-4 pt-2 pb-4 space-y-1.5 shadow-2xl">
+      <a href="#top" onclick="scrollToSection(event, 'top'); closeMobileMenu();" class="block px-3 py-2.5 rounded-lg text-sm font-medium text-gray-200 hover:bg-white/5">
+        Главная
+      </a>
+      <a href="#bot-helper" onclick="scrollToSection(event, 'bot-helper'); closeMobileMenu();" class="block px-3 py-2.5 rounded-lg text-sm font-medium text-gray-200 hover:bg-white/5 flex items-center gap-2">
+        <span class="w-2 h-2 rounded-full bg-brand-red"></span>
+        Бот-помощник для промптов
+      </a>
+      <a href="#frendi" onclick="scrollToSection(event, 'frendi'); closeMobileMenu();" class="block px-3 py-2 rounded-lg text-xs font-medium text-gray-400 hover:text-white hover:bg-white/5 pl-6">
+        1. Генерация на Frendi.ai
+      </a>
+      <a href="#arena" onclick="scrollToSection(event, 'arena'); closeMobileMenu();" class="block px-3 py-2 rounded-lg text-xs font-medium text-gray-400 hover:text-white hover:bg-white/5 pl-6">
+        2. Сайт Arena.ai (Фото и Видео)
+      </a>
+      <a href="#chatgpt" onclick="scrollToSection(event, 'chatgpt'); closeMobileMenu();" class="block px-3 py-2 rounded-lg text-xs font-medium text-gray-400 hover:text-white hover:bg-white/5 pl-6">
+        3. Генерация в ChatGPT
+      </a>
+      <a href="#tgbot" onclick="scrollToSection(event, 'tgbot'); closeMobileMenu();" class="block px-3 py-2 rounded-lg text-xs font-medium text-gray-400 hover:text-white hover:bg-white/5 pl-6">
+        4. Телеграм-бот @GPT4Telegrambot
+      </a>
+      <a href="#lifehacks" onclick="scrollToSection(event, 'lifehacks'); closeMobileMenu();" class="block px-3 py-2 rounded-lg text-xs font-medium text-gray-400 hover:text-white hover:bg-white/5 pl-6">
+        5. Лайфхаки и шаблоны промптов
+      </a>
+      <div class="border-t border-brand-border my-2 pt-2 space-y-1">
+        <a href="https://frendi.ai/chat/assistent-matiss-ai-art-prompts-design-2" target="_blank" rel="noopener noreferrer" class="block px-3 py-2.5 rounded-lg text-sm font-semibold text-brand-red hover:bg-white/5">
+          Открыть бота-помощника ↗
+        </a>
+        <a href="https://matovyaa.github.io/gaid-sozdanie-botov/" target="_blank" rel="noopener noreferrer" class="block px-3 py-2.5 rounded-lg text-sm font-medium text-gray-200 hover:bg-white/5">
+          Гайды по созданию ботов ↗
+        </a>
+        <a href="https://t.me/matovya_creator" target="_blank" rel="noopener noreferrer" class="block px-3 py-2.5 rounded-lg text-sm font-medium text-gray-200 hover:bg-white/5">
+          ТГ канал «Хрущёвка» ↗
+        </a>
+      </div>
+      <div class="pt-1">
+        <a href="https://frendi.ai/user/455adeea-33b7-44a2-a640-89bff5eefd20" target="_blank" rel="noopener noreferrer" class="w-full py-2.5 px-4 rounded-lg text-sm font-semibold bg-brand-red text-white flex items-center justify-center gap-2">
+          <span>Перейти на Frendi.ai</span>
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
+          </svg>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Главный контент -->
+  <main id="top" class="flex-grow">
+    <!-- Hero-секция -->
+    <section class="relative pt-8 pb-10 sm:pt-14 sm:pb-14 overflow-hidden">
+      <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[320px] sm:w-[550px] h-[240px] bg-brand-red/15 blur-[120px] pointer-events-none rounded-full"></div>
+
+      <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <!-- Бейдж автора -->
+        <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-brand-card border border-brand-border text-xs font-medium text-gray-300 mb-5">
+          <span class="w-2 h-2 rounded-full bg-brand-red"></span>
+          <span>Авторский гайд от <strong class="text-white">Матти (matovya)</strong></span>
+        </div>
+
+        <h1 class="text-2xl sm:text-4xl lg:text-5xl font-black tracking-tight text-white leading-tight mb-4 break-words">
+          Гайд по генерации <span class="text-brand-red">изображений и видео</span> для ваших ботов
+        </h1>
+
+        <p class="text-sm sm:text-lg text-gray-300 leading-relaxed max-w-3xl mb-7">
+          Привет! Я <strong class="text-white">Матти (matovya)</strong>. В этом руководстве я собрала 4 проверенные площадки, где я сама создаю аватарки и видео-обложки для своих персонажей на <a href="https://frendi.ai/user/455adeea-33b7-44a2-a640-89bff5eefd20" target="_blank" rel="noopener noreferrer" class="text-brand-red hover:underline font-semibold">Frendi.ai</a>, а также свои рабочие приёмы, шаблоны промптов и советы по свету и анатомии лица.
+        </p>
+
+        <!-- Быстрая навигация по разделам (Pills) -->
+        <div class="bg-brand-card/90 border border-brand-border rounded-2xl p-4 sm:p-5">
+          <div class="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-3 flex items-center gap-2">
+            <svg class="w-4 h-4 text-brand-red flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"/>
+            </svg>
+            <span>Быстрый переход по гайду:</span>
+          </div>
+          <div class="flex flex-wrap gap-2">
+            <a href="#bot-helper" onclick="scrollToSection(event, 'bot-helper')" class="px-3.5 py-2 rounded-xl bg-brand-red/15 border border-brand-red/40 text-xs sm:text-sm font-semibold text-white hover:bg-brand-red hover:border-brand-red transition">
+              Бот-помощник для промптов
+            </a>
+            <a href="#frendi" onclick="scrollToSection(event, 'frendi')" class="px-3.5 py-2 rounded-xl bg-brand-cardAlt border border-brand-border text-xs sm:text-sm font-medium text-gray-200 hover:border-brand-red/60 hover:text-white transition">
+              1. Frendi.ai
+            </a>
+            <a href="#arena" onclick="scrollToSection(event, 'arena')" class="px-3.5 py-2 rounded-xl bg-brand-cardAlt border border-brand-border text-xs sm:text-sm font-medium text-gray-200 hover:border-brand-red/60 hover:text-white transition">
+              2. Arena.ai (Фото + Видео)
+            </a>
+            <a href="#chatgpt" onclick="scrollToSection(event, 'chatgpt')" class="px-3.5 py-2 rounded-xl bg-brand-cardAlt border border-brand-border text-xs sm:text-sm font-medium text-gray-200 hover:border-brand-red/60 hover:text-white transition">
+              3. ChatGPT
+            </a>
+            <a href="#tgbot" onclick="scrollToSection(event, 'tgbot')" class="px-3.5 py-2 rounded-xl bg-brand-cardAlt border border-brand-border text-xs sm:text-sm font-medium text-gray-200 hover:border-brand-red/60 hover:text-white transition">
+              4. @GPT4Telegrambot
+            </a>
+            <a href="#lifehacks" onclick="scrollToSection(event, 'lifehacks')" class="px-3.5 py-2 rounded-xl bg-brand-cardAlt border border-brand-border text-xs sm:text-sm font-medium text-gray-200 hover:border-brand-red/60 hover:text-white transition">
+              Лайфхаки и шаблоны
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Блок: Бот-помощник -->
+    <section id="bot-helper" class="py-5 scroll-mt-20">
+      <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="relative rounded-2xl bg-gradient-to-br from-[#1b0c0e] via-brand-card to-brand-card border border-brand-red/40 p-5 sm:p-8 red-glow overflow-hidden">
+          <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
+            <div class="space-y-3 max-w-2xl">
+              <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-red/20 border border-brand-red/40 text-brand-red text-xs font-bold uppercase tracking-wider">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                </svg>
+                Специальный инструмент на Frendi.ai
+              </div>
+              <h2 class="text-xl sm:text-3xl font-extrabold text-white">
+                Бот-помощник для создания промптов
+              </h2>
+              <p class="text-sm sm:text-base text-gray-300 leading-relaxed">
+                Не знаешь, как правильно описать внешность, ракурс, анатомию лица или сложный кинематографичный свет? Я создала специального бота-помощника! Просто опиши ему свою задумку своими словами, и он соберёт для тебя детальный профессиональный промпт (на русском или английском языке) под любую из площадок ниже.
+              </p>
+            </div>
+            <div class="flex-shrink-0 flex flex-col items-stretch md:items-end gap-2">
+              <a href="https://frendi.ai/chat/assistent-matiss-ai-art-prompts-design-2" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center gap-2.5 px-6 py-3.5 rounded-xl bg-brand-red hover:bg-brand-redHover text-white font-bold text-sm sm:text-base red-glow-sm transition">
+                <span>Открыть бота-помощника</span>
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
+                </svg>
+              </a>
+              <span class="text-[11px] text-gray-400 text-center md:text-right">Откроется чат с ботом на Frendi.ai</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==========================================
+         РАЗДЕЛ 1: FRENDI.AI
+         ========================================== -->
+    <section id="frendi" class="py-8 sm:py-10 scroll-mt-20">
+      <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="bg-brand-card border border-brand-border rounded-2xl p-5 sm:p-8 space-y-7">
+          
+          <!-- Заголовок и бейджи -->
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-brand-border pb-5">
+            <div>
+              <div class="text-xs font-bold uppercase tracking-widest text-brand-red mb-1">Способ №1 • Встроенный генератор</div>
+              <h2 class="text-xl sm:text-3xl font-extrabold text-white">1. Генерация прямо на Frendi.ai</h2>
+            </div>
+            <div class="flex flex-wrap gap-2">
+              <span class="px-3 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-semibold">Без V*N</span>
+              <span class="px-3 py-1 rounded-lg bg-white/5 border border-brand-border text-gray-300 text-xs font-semibold">Модель: GPT Image 2</span>
+              <span class="px-3 py-1 rounded-lg bg-white/5 border border-brand-border text-gray-300 text-xs font-semibold">Лимит: до 500 символов</span>
+            </div>
+          </div>
+
+          <!-- Описание -->
+          <p class="text-gray-300 text-sm sm:text-base leading-relaxed">
+            На самом сайте <strong class="text-white">Frendi.ai</strong> прямо во время создания или редактирования бота есть встроенный генератор изображений. Это самый быстрый способ сгенерировать аватарку без перехода на сторонние ресурсы.
+          </p>
+
+          <!-- Карточка-гайд (4:3 без обрезки) -->
+          <div class="space-y-2.5">
+            <div class="text-xs font-semibold uppercase tracking-wider text-gray-400 flex items-center gap-2">
+              <svg class="w-4 h-4 text-brand-red flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+              </svg>
+              <span>Наглядная шпаргалка по интерфейсу Frendi.ai (нажми для увеличения):</span>
+            </div>
+            <div class="guide-img-box" onclick="openLightboxFromBox(this, 'Гайд по генерации на Frendi.ai')">
+              <img src="guide-frendi.jpg" data-base="guide-frendi" alt="Гайд по генерации на Frendi.ai" onerror="resolveImage(this)" />
+              <div class="absolute bottom-2.5 right-2.5 px-3 py-1.5 rounded-lg bg-black/80 border border-white/15 text-xs font-medium text-white flex items-center gap-1.5 pointer-events-none">
+                <svg class="w-4 h-4 text-brand-red" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"/>
+                </svg>
+                <span>Увеличить схему</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Пошаговая инструкция -->
+          <div class="space-y-4">
+            <h3 class="text-base sm:text-lg font-bold text-white">Как сгенерировать изображение пошагово:</h3>
+            <div class="space-y-4">
+              <div class="step-item">
+                <div class="absolute left-0 top-0 w-7 h-7 rounded-lg bg-brand-red text-white font-bold text-xs flex items-center justify-center">1</div>
+                <h4 class="font-semibold text-white text-sm sm:text-base">Открой генератор аватара</h4>
+                <p class="text-gray-400 text-sm mt-0.5">Перейди в раздел создания персонажа и в блоке «Аватар» нажми кнопку <strong class="text-gray-200">«Сгенерировать»</strong>.</p>
+              </div>
+              <div class="step-item">
+                <div class="absolute left-0 top-0 w-7 h-7 rounded-lg bg-brand-red text-white font-bold text-xs flex items-center justify-center">2</div>
+                <h4 class="font-semibold text-white text-sm sm:text-base">Проверь модель генерации</h4>
+                <p class="text-gray-400 text-sm mt-0.5">Внутри по умолчанию установлена модель <strong class="text-gray-200">GPT Image 2</strong>.</p>
+              </div>
+              <div class="step-item">
+                <div class="absolute left-0 top-0 w-7 h-7 rounded-lg bg-brand-red text-white font-bold text-xs flex items-center justify-center">3</div>
+                <h4 class="font-semibold text-white text-sm sm:text-base">Введи промпт (до 500 символов)</h4>
+                <p class="text-gray-400 text-sm mt-0.5">Опиши персонажа в поле ввода. Так как лимит составляет <strong class="text-gray-200">500 символов</strong>, пиши только самое важное: стиль, черты лица, причёску, одежду, ракурс и освещение.</p>
+              </div>
+              <div class="step-item">
+                <div class="absolute left-0 top-0 w-7 h-7 rounded-lg bg-brand-red text-white font-bold text-xs flex items-center justify-center">4</div>
+                <h4 class="font-semibold text-white text-sm sm:text-base">Запусти генерацию</h4>
+                <p class="text-gray-400 text-sm mt-0.5">Нажми красную кнопку со стрелочкой справа от поля ввода и подожди несколько секунд, пока появятся готовые варианты.</p>
+              </div>
+              <div class="step-item">
+                <div class="absolute left-0 top-0 w-7 h-7 rounded-lg bg-brand-red text-white font-bold text-xs flex items-center justify-center">5</div>
+                <h4 class="font-semibold text-white text-sm sm:text-base">Выбери фото или скачай оригинал из профиля</h4>
+                <p class="text-gray-400 text-sm mt-0.5">Ты можешь сразу прикрепить арт к боту кнопкой <strong class="text-gray-200">«Выбрать фото»</strong> либо скачать его в полном размере через свой профиль: зайди в <strong class="text-gray-200">«Мои персонажи» → «Генерации»</strong>.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Примеры работ Frendi.ai (2 квадратные карточки 1:1 — 0% обрезки) -->
+          <div class="space-y-3 pt-2">
+            <div class="flex items-center justify-between gap-2">
+              <h3 class="text-xs sm:text-sm font-bold uppercase tracking-wider text-gray-400">Примеры генераций на Frendi.ai (GPT Image 2):</h3>
+              <span class="text-[11px] text-gray-500 hidden sm:inline">Нажми на арт для полного экрана</span>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div class="art-card" onclick="openLightboxFromBox(this, 'Пример #1 • Frendi.ai — Фэнтези-образ на закатных облаках (GPT Image 2)')">
+                <div class="art-viewport-square">
+                  <img class="art-main-img" src="frendi-1.jpg" data-base="frendi-1" alt="Пример генерации на Frendi.ai — Демон с веером на закате" onerror="resolveImage(this)" />
+                  <div class="absolute top-2.5 right-2.5 z-10 w-8 h-8 rounded-lg bg-black/70 border border-white/15 text-white flex items-center justify-center pointer-events-none">
+                    <svg class="w-4 h-4 text-brand-red" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"/>
+                    </svg>
+                  </div>
+                </div>
+                <div class="p-3.5 bg-brand-cardAlt border-t border-brand-border">
+                  <span class="text-[11px] font-bold text-brand-red uppercase tracking-wider block">Пример #1 • Frendi.ai</span>
+                  <p class="text-xs sm:text-sm font-medium text-gray-200 mt-0.5">Фэнтези-образ на закатных облаках (GPT Image 2)</p>
+                </div>
+              </div>
+
+              <div class="art-card" onclick="openLightboxFromBox(this, 'Пример #2 • Frendi.ai — Портрет с контровым закатным светом (GPT Image 2)')">
+                <div class="art-viewport-square">
+                  <img class="art-main-img" src="frendi-2.jpg" data-base="frendi-2" alt="Пример генерации на Frendi.ai — Парень на крыше на закате" onerror="resolveImage(this)" />
+                  <div class="absolute top-2.5 right-2.5 z-10 w-8 h-8 rounded-lg bg-black/70 border border-white/15 text-white flex items-center justify-center pointer-events-none">
+                    <svg class="w-4 h-4 text-brand-red" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"/>
+                    </svg>
+                  </div>
+                </div>
+                <div class="p-3.5 bg-brand-cardAlt border-t border-brand-border">
+                  <span class="text-[11px] font-bold text-brand-red uppercase tracking-wider block">Пример #2 • Frendi.ai</span>
+                  <p class="text-xs sm:text-sm font-medium text-gray-200 mt-0.5">Портрет с контровым закатным светом (GPT Image 2)</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ==========================================
+         РАЗДЕЛ 2: ARENA.AI
+         ========================================== -->
+    <section id="arena" class="py-8 sm:py-10 scroll-mt-20">
+      <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="bg-brand-card border border-brand-border rounded-2xl p-5 sm:p-8 space-y-7">
+          
+          <!-- Заголовок и бейджи -->
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-brand-border pb-5">
+            <div>
+              <div class="text-xs font-bold uppercase tracking-widest text-brand-red mb-1">Способ №2 • Изображения и Видео</div>
+              <h2 class="text-xl sm:text-3xl font-extrabold text-white">2. Сайт Arena (arena.ai)</h2>
+            </div>
+            <div class="flex flex-wrap gap-2">
+              <span class="px-3 py-1 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs font-semibold">Нужен V*N</span>
+              <span class="px-3 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-semibold">Бесплатно</span>
+              <span class="px-3 py-1 rounded-lg bg-white/5 border border-brand-border text-gray-300 text-xs font-semibold">Промпты на английском</span>
+            </div>
+          </div>
+
+          <!-- Описание + ссылка -->
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-brand-cardAlt border border-brand-border rounded-xl p-4">
+            <p class="text-gray-300 text-sm leading-relaxed">
+              <strong class="text-white">Arena.ai</strong> — бесплатная платформа, где собраны топовые нейросети для генерации как картинок, так и коротких видео. Работает с включённым <strong class="text-white">V*N</strong>, а запросы лучше писать <strong class="text-white">на английском языке</strong>.
+            </p>
+            <a href="https://arena.ai" target="_blank" rel="noopener noreferrer" class="flex-shrink-0 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-brand-red hover:bg-brand-redHover text-white text-xs sm:text-sm font-bold transition">
+              <span>Открыть arena.ai</span>
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+              </svg>
+            </a>
+          </div>
+
+          <!-- Карточка-гайд Arena (4:3) -->
+          <div class="space-y-2.5">
+            <div class="text-xs font-semibold uppercase tracking-wider text-gray-400 flex items-center gap-2">
+              <svg class="w-4 h-4 text-brand-red flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+              </svg>
+              <span>Наглядная шпаргалка по режимам Arena.ai (нажми для увеличения):</span>
+            </div>
+            <div class="guide-img-box" onclick="openLightboxFromBox(this, 'Гайд по генерации фото и видео на Arena.ai')">
+              <img src="guide-arena.jpg" data-base="guide-arena" alt="Гайд по генерации фото и видео на Arena.ai" onerror="resolveImage(this)" />
+              <div class="absolute bottom-2.5 right-2.5 px-3 py-1.5 rounded-lg bg-black/80 border border-white/15 text-xs font-medium text-white flex items-center gap-1.5 pointer-events-none">
+                <svg class="w-4 h-4 text-brand-red" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"/>
+                </svg>
+                <span>Увеличить схему</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Пошаговый разбор режимов -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div class="bg-brand-cardAlt border border-brand-border rounded-xl p-5 space-y-3">
+              <div class="flex items-center gap-2 text-brand-red font-bold text-sm uppercase tracking-wider">
+                <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                </svg>
+                <span>Генерация изображений (Image)</span>
+              </div>
+              <ul class="space-y-2.5 text-sm text-gray-300">
+                <li>• <strong class="text-white">3 режима сверху:</strong>
+                  <ul class="pl-3 mt-1.5 space-y-1.5 text-gray-400">
+                    <li>— <strong class="text-gray-200">Battle:</strong> две случайные модели генерируют 2 картинки вслепую на выбор.</li>
+                    <li>— <strong class="text-gray-200">Side by Side:</strong> ты сама выбираешь 2 конкретные нейросети и сравниваешь их результат.</li>
+                    <li>— <strong class="text-gray-200">Direct:</strong> генерация одной выбранной моделью.</li>
+                  </ul>
+                </li>
+                <li>• <strong class="text-white">Значок «очков» возле модели:</strong> показывает, что эта нейросеть умеет принимать картинку-референс (через кнопку «+» в поле ввода).</li>
+              </ul>
+            </div>
+
+            <div class="bg-brand-cardAlt border border-brand-border rounded-xl p-5 space-y-3">
+              <div class="flex items-center gap-2 text-brand-red font-bold text-sm uppercase tracking-wider">
+                <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                </svg>
+                <span>Генерация видео (Video)</span>
+              </div>
+              <ul class="space-y-2.5 text-sm text-gray-300">
+                <li>• Нажми на иконку <strong class="text-white">Video</strong> под строкой ввода промпта.</li>
+                <li>• <strong class="text-white">Только в режиме Battle Mode:</strong> генерация видео доступна исключительно в режиме «Battle» (выбрать конкретную видео-модель вручную нельзя).</li>
+                <li>• <strong class="text-white">Оживление фото:</strong> нажми «+», прикрепи готовую аватарку персонажа и напиши на английском, какое движение нужно сделать (например, лёгкая улыбка, ветер в волосах, взгляд в камеру).</li>
+                <li>• <strong class="text-white">Лимит:</strong> бесплатно даётся <strong class="text-gray-200">1 видео-генерация в день</strong> (ролик длится около 5 секунд, сразу в 2 вариантах от двух моделей).</li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- Примеры работ Arena.ai (2 квадратные карточки 1:1 — без обрезки) -->
+          <div class="space-y-3 pt-2">
+            <div class="flex items-center justify-between gap-2">
+              <h3 class="text-xs sm:text-sm font-bold uppercase tracking-wider text-gray-400">Примеры генераций в Arena.ai (один промпт в разных моделях):</h3>
+              <span class="text-[11px] text-gray-500 hidden sm:inline">Нажми на арт для полного экрана</span>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div class="art-card" onclick="openLightboxFromBox(this, 'Пример #1 • Arena.ai — Художественный семи-реализм с закатным контровым светом')">
+                <div class="art-viewport-square">
+                  <img class="art-main-img" src="arena-1.jpg" data-base="arena-1" alt="Пример генерации в Arena.ai — Вариант модели #1" onerror="resolveImage(this)" />
+                  <div class="absolute top-2.5 right-2.5 z-10 w-8 h-8 rounded-lg bg-black/70 border border-white/15 text-white flex items-center justify-center pointer-events-none">
+                    <svg class="w-4 h-4 text-brand-red" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"/>
+                    </svg>
+                  </div>
+                </div>
+                <div class="p-3.5 bg-brand-cardAlt border-t border-brand-border">
+                  <span class="text-[11px] font-bold text-brand-red uppercase tracking-wider block">Пример #1 • Arena.ai</span>
+                  <p class="text-xs sm:text-sm font-medium text-gray-200 mt-0.5">Художественный семи-реализм с закатным контровым светом</p>
+                </div>
+              </div>
+
+              <div class="art-card" onclick="openLightboxFromBox(this, 'Пример #2 • Arena.ai — Мягкий фотореализм по тому же промпту (Side by Side)')">
+                <div class="art-viewport-square">
+                  <img class="art-main-img" src="arena-2.jpg" data-base="arena-2" alt="Пример генерации в Arena.ai — Вариант модели #2" onerror="resolveImage(this)" />
+                  <div class="absolute top-2.5 right-2.5 z-10 w-8 h-8 rounded-lg bg-black/70 border border-white/15 text-white flex items-center justify-center pointer-events-none">
+                    <svg class="w-4 h-4 text-brand-red" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"/>
+                    </svg>
+                  </div>
+                </div>
+                <div class="p-3.5 bg-brand-cardAlt border-t border-brand-border">
+                  <span class="text-[11px] font-bold text-brand-red uppercase tracking-wider block">Пример #2 • Arena.ai</span>
+                  <p class="text-xs sm:text-sm font-medium text-gray-200 mt-0.5">Мягкий фотореализм по тому же промпту (Side by Side)</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ==========================================
+         РАЗДЕЛ 3: CHATGPT
+         ========================================== -->
+    <section id="chatgpt" class="py-8 sm:py-10 scroll-mt-20">
+      <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="bg-brand-card border border-brand-border rounded-2xl p-5 sm:p-8 space-y-7">
+          
+          <!-- Заголовок и бейджи -->
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-brand-border pb-5">
+            <div>
+              <div class="text-xs font-bold uppercase tracking-widest text-brand-red mb-1">Способ №3 • Диалоговая генерация</div>
+              <h2 class="text-xl sm:text-3xl font-extrabold text-white">3. ChatGPT (chatgpt.com)</h2>
+            </div>
+            <div class="flex flex-wrap gap-2">
+              <span class="px-3 py-1 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs font-semibold">Нужен V*N</span>
+              <span class="px-3 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-semibold">Понимает русский</span>
+              <span class="px-3 py-1 rounded-lg bg-white/5 border border-brand-border text-gray-300 text-xs font-semibold">Помнит контекст чата</span>
+            </div>
+          </div>
+
+          <!-- Описание + ссылка -->
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-brand-cardAlt border border-brand-border rounded-xl p-4">
+            <p class="text-gray-300 text-sm leading-relaxed">
+              <strong class="text-white">ChatGPT</strong> отлично понимает длинные промпты на русском языке, держит контекст беседы и позволяет дорабатывать уже сгенерированную картинку простыми сообщениями в чате.
+            </p>
+            <a href="https://chatgpt.com" target="_blank" rel="noopener noreferrer" class="flex-shrink-0 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-brand-red hover:bg-brand-redHover text-white text-xs sm:text-sm font-bold transition">
+              <span>Открыть ChatGPT</span>
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+              </svg>
+            </a>
+          </div>
+
+          <!-- Карточка-гайд ChatGPT (4:3) -->
+          <div class="space-y-2.5">
+            <div class="text-xs font-semibold uppercase tracking-wider text-gray-400 flex items-center gap-2">
+              <svg class="w-4 h-4 text-brand-red flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+              </svg>
+              <span>Наглядная шпаргалка по генерации в ChatGPT (нажми для увеличения):</span>
+            </div>
+            <div class="guide-img-box" onclick="openLightboxFromBox(this, 'Гайд по генерации в ChatGPT')">
+              <img src="guide-chatgpt.jpg" data-base="guide-chatgpt" alt="Гайд по генерации в ChatGPT" onerror="resolveImage(this)" />
+              <div class="absolute bottom-2.5 right-2.5 px-3 py-1.5 rounded-lg bg-black/80 border border-white/15 text-xs font-medium text-white flex items-center gap-1.5 pointer-events-none">
+                <svg class="w-4 h-4 text-brand-red" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"/>
+                </svg>
+                <span>Увеличить схему</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 2 способа и фишки ChatGPT -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div class="bg-brand-cardAlt border border-brand-border rounded-xl p-5 space-y-3">
+              <h3 class="font-bold text-white text-base flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-brand-red flex-shrink-0"></span>
+                <span>Два способа запустить генерацию:</span>
+              </h3>
+              <ul class="space-y-2.5 text-sm text-gray-300">
+                <li>
+                  <strong class="text-white">1. Прямо в обычном чате:</strong> начни своё сообщение со слов <span class="text-brand-red font-semibold">«Создай изображение...»</span> или <span class="text-brand-red font-semibold">«Нарисуй...»</span>, а через кнопку «+» при желании прикрепи фото-референс.
+                </li>
+                <li>
+                  <strong class="text-white">2. Через меню инструментов:</strong> нажми на кнопку <strong class="text-white">«+»</strong> слева от поля ввода и выбери пункт <strong class="text-white">«Создать изображение»</strong> (или открой вкладку «Изображения» в боковой панели).
+                </li>
+              </ul>
+            </div>
+
+            <div class="bg-brand-cardAlt border border-brand-border rounded-xl p-5 space-y-3">
+              <h3 class="font-bold text-white text-base flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-brand-red flex-shrink-0"></span>
+                <span>Как избежать «шаблонных» лиц и править детали:</span>
+              </h3>
+              <ul class="space-y-2.5 text-sm text-gray-300">
+                <li>
+                  • <strong class="text-white">Прописывай анатомию лица:</strong> чтобы ChatGPT не делал одинаковые базовые лица, обязательно уточняй форму скул, разрез глаз, форму носа, губ и челюсти.
+                </li>
+                <li>
+                  • <strong class="text-white">Правки прямо в диалоге:</strong> если арт почти идеальный, просто напиши следом: <em>«Оставь всё так же, но сделай взгляд спокойнее»</em> или <em>«Поменяй цвет рубашки на чёрный»</em>.
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- Примеры работ ChatGPT (2 вертикальные карточки 2:3 — родной формат ChatGPT без обрезки) -->
+          <div class="space-y-3 pt-2">
+            <div class="flex items-center justify-between gap-2">
+              <h3 class="text-xs sm:text-sm font-bold uppercase tracking-wider text-gray-400">Примеры генераций в ChatGPT (сохранение внешности и деталей):</h3>
+              <span class="text-[11px] text-gray-500 hidden sm:inline">Нажми на арт для полного экрана</span>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div class="art-card" onclick="openLightboxFromBox(this, 'Пример #1 • ChatGPT — Детальная проработка костюма и света в вертикальном формате')">
+                <div class="art-viewport-portrait">
+                  <img class="art-main-img" src="chatgpt-1.jpg" data-base="chatgpt-1" alt="Пример генерации в ChatGPT — Персонаж на облаках (Вариант 1)" onerror="resolveImage(this)" />
+                  <div class="absolute top-2.5 right-2.5 z-10 w-8 h-8 rounded-lg bg-black/70 border border-white/15 text-white flex items-center justify-center pointer-events-none">
+                    <svg class="w-4 h-4 text-brand-red" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"/>
+                    </svg>
+                  </div>
+                </div>
+                <div class="p-3.5 bg-brand-cardAlt border-t border-brand-border">
+                  <span class="text-[11px] font-bold text-brand-red uppercase tracking-wider block">Пример #1 • ChatGPT</span>
+                  <p class="text-xs sm:text-sm font-medium text-gray-200 mt-0.5">Детальная проработка костюма и света в вертикальном формате</p>
+                </div>
+              </div>
+
+              <div class="art-card" onclick="openLightboxFromBox(this, 'Пример #2 • ChatGPT — Смена позы и крупности плана с сохранением черт лица')">
+                <div class="art-viewport-portrait">
+                  <img class="art-main-img" src="chatgpt-2.jpg" data-base="chatgpt-2" alt="Пример генерации в ChatGPT — Персонаж на облаках (Вариант 2)" onerror="resolveImage(this)" />
+                  <div class="absolute top-2.5 right-2.5 z-10 w-8 h-8 rounded-lg bg-black/70 border border-white/15 text-white flex items-center justify-center pointer-events-none">
+                    <svg class="w-4 h-4 text-brand-red" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"/>
+                    </svg>
+                  </div>
+                </div>
+                <div class="p-3.5 bg-brand-cardAlt border-t border-brand-border">
+                  <span class="text-[11px] font-bold text-brand-red uppercase tracking-wider block">Пример #2 • ChatGPT</span>
+                  <p class="text-xs sm:text-sm font-medium text-gray-200 mt-0.5">Смена позы и крупности плана с сохранением черт лица</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ==========================================
+         РАЗДЕЛ 4: TELEGRAM-БОТ (@GPT4Telegrambot)
+         ========================================== -->
+    <section id="tgbot" class="py-8 sm:py-10 scroll-mt-20">
+      <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="bg-brand-card border border-brand-border rounded-2xl p-5 sm:p-8 space-y-7">
+          
+          <!-- Заголовок и бейджи -->
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-brand-border pb-5">
+            <div>
+              <div class="text-xs font-bold uppercase tracking-widest text-brand-red mb-1">Способ №4 • Прямо в Telegram</div>
+              <h2 class="text-xl sm:text-3xl font-extrabold text-white">4. Телеграм-бот @GPT4Telegrambot</h2>
+            </div>
+            <div class="flex flex-wrap gap-2">
+              <span class="px-3 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-semibold">Без V*N</span>
+              <span class="px-3 py-1 rounded-lg bg-white/5 border border-brand-border text-gray-300 text-xs font-semibold">25 бесплатных генераций / нед.</span>
+              <span class="px-3 py-1 rounded-lg bg-white/5 border border-brand-border text-gray-300 text-xs font-semibold">До 4 референсов</span>
+            </div>
+          </div>
+
+          <!-- Описание + ссылка -->
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-brand-cardAlt border border-brand-border rounded-xl p-4">
+            <p class="text-gray-300 text-sm leading-relaxed">
+              Удобный бот прямо в Telegram, где собраны <strong class="text-white">GPT Image 2.5, Nano Banana Pro, Midjourney, Seedream 5, FLUX 2 и Recraft 4.1</strong>. Отличный вариант, когда нужно быстро сгенерировать арт с телефона без V*N.
+            </p>
+            <a href="https://t.me/GPT4Telegrambot" target="_blank" rel="noopener noreferrer" class="flex-shrink-0 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-brand-red hover:bg-brand-redHover text-white text-xs sm:text-sm font-bold transition">
+              <span>Открыть @GPT4Telegrambot</span>
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+              </svg>
+            </a>
+          </div>
+
+          <!-- Карточка-гайд TG Bot (4:3) -->
+          <div class="space-y-2.5">
+            <div class="text-xs font-semibold uppercase tracking-wider text-gray-400 flex items-center gap-2">
+              <svg class="w-4 h-4 text-brand-red flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+              </svg>
+              <span>Наглядная шпаргалка по @GPT4Telegrambot (нажми для увеличения):</span>
+            </div>
+            <div class="guide-img-box" onclick="openLightboxFromBox(this, 'Гайд по генерации в @GPT4Telegrambot')">
+              <img src="guide-tgbot.jpg" data-base="guide-tgbot" alt="Гайд по генерации в @GPT4Telegrambot" onerror="resolveImage(this)" />
+              <div class="absolute bottom-2.5 right-2.5 px-3 py-1.5 rounded-lg bg-black/80 border border-white/15 text-xs font-medium text-white flex items-center gap-1.5 pointer-events-none">
+                <svg class="w-4 h-4 text-brand-red" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"/>
+                </svg>
+                <span>Увеличить схему</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Пошаговая инструкция -->
+          <div class="space-y-4">
+            <h3 class="text-base sm:text-lg font-bold text-white">Как пользоваться ботом пошагово:</h3>
+            <div class="space-y-4">
+              <div class="step-item">
+                <div class="absolute left-0 top-0 w-7 h-7 rounded-lg bg-brand-red text-white font-bold text-xs flex items-center justify-center">1</div>
+                <h4 class="font-semibold text-white text-sm sm:text-base">Запусти бота и открой меню картинок</h4>
+                <p class="text-gray-400 text-sm mt-0.5">Отправь команду <code class="text-brand-red bg-white/5 px-1.5 py-0.5 rounded">/start</code>, затем нажми кнопку <strong class="text-gray-200">«Создать картинку»</strong> (или введи команду <code class="text-brand-red bg-white/5 px-1.5 py-0.5 rounded">/photo</code>).</p>
+              </div>
+              <div class="step-item">
+                <div class="absolute left-0 top-0 w-7 h-7 rounded-lg bg-brand-red text-white font-bold text-xs flex items-center justify-center">2</div>
+                <h4 class="font-semibold text-white text-sm sm:text-base">Выбери нейросеть</h4>
+                <p class="text-gray-400 text-sm mt-0.5">Для создания проработанных персонажей отлично подходит <strong class="text-gray-200">«GPT Image 2.5»</strong> (также в меню доступны <em>Nano Banana Pro, Midjourney, Seedream 5, FLUX 2, Recraft 4.1</em>).</p>
+              </div>
+              <div class="step-item">
+                <div class="absolute left-0 top-0 w-7 h-7 rounded-lg bg-brand-red text-white font-bold text-xs flex items-center justify-center">3</div>
+                <h4 class="font-semibold text-white text-sm sm:text-base">Укажи формат 3:4 и отправь промпт</h4>
+                <p class="text-gray-400 text-sm mt-0.5">Выбери вертикальное соотношение сторон <strong class="text-gray-200">3:4</strong> (идеально под карточку бота) и отправь текст промпта. При желании прикрепи от <strong class="text-gray-200">1 до 4 фото-референсов</strong> одним сообщением с подписью.</p>
+              </div>
+              <div class="step-item">
+                <div class="absolute left-0 top-0 w-7 h-7 rounded-lg bg-brand-red text-white font-bold text-xs flex items-center justify-center">4</div>
+                <h4 class="font-semibold text-white text-sm sm:text-base">Кнопки «Повторить» и «Начать заново»</h4>
+                <p class="text-gray-400 text-sm mt-0.5">Под готовым артом появятся кнопки: <strong class="text-gray-200">«Повторить»</strong> (сделает ещё один вариант по тому же запросу) и <strong class="text-gray-200">«Начать заново»</strong>. Учти, что бот <strong class="text-white">не помнит предыдущие сообщения</strong>, поэтому каждый раз отправляй полный промпт целиком.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Примеры работ TG Bot (Умный контейнер 3:4 без обрезки веера у 1-го арта) -->
+          <div class="space-y-3 pt-2">
+            <div class="flex items-center justify-between gap-2">
+              <h3 class="text-xs sm:text-sm font-bold uppercase tracking-wider text-gray-400">Примеры генераций в @GPT4Telegrambot:</h3>
+              <span class="text-[11px] text-gray-500 hidden sm:inline">Нажми на арт для полного экрана</span>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div class="art-card" onclick="openLightboxFromBox(this, 'Пример #1 • @GPT4Telegrambot — Детализированный полуреализм с мягким закатным светом')">
+                <div class="art-viewport-smart">
+                  <!-- Размытая атмосферная подложка, чтобы квадратный арт в блоке 3:4 смотрелся без чёрных полос и без обрезки веера -->
+                  <img src="tgbot-1.jpg" data-base="tgbot-1" alt="" aria-hidden="true" class="absolute inset-0 w-full h-full object-cover blur-xl opacity-40 scale-110 pointer-events-none" onerror="resolveImage(this)" />
+                  <img class="art-main-img-contain" src="tgbot-1.jpg" data-base="tgbot-1" alt="Пример генерации в @GPT4Telegrambot — Полуреализм" onerror="resolveImage(this)" />
+                  <div class="absolute top-2.5 right-2.5 z-10 w-8 h-8 rounded-lg bg-black/70 border border-white/15 text-white flex items-center justify-center pointer-events-none">
+                    <svg class="w-4 h-4 text-brand-red" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"/>
+                    </svg>
+                  </div>
+                </div>
+                <div class="p-3.5 bg-brand-cardAlt border-t border-brand-border">
+                  <span class="text-[11px] font-bold text-brand-red uppercase tracking-wider block">Пример #1 • @GPT4Telegrambot</span>
+                  <p class="text-xs sm:text-sm font-medium text-gray-200 mt-0.5">Детализированный полуреализм с мягким закатным светом</p>
+                </div>
+              </div>
+
+              <div class="art-card" onclick="openLightboxFromBox(this, 'Пример #2 • @GPT4Telegrambot — Стилизация в духе аниме / манхва семи-реализма (3:4)')">
+                <div class="art-viewport-smart">
+                  <img class="art-main-img" src="tgbot-2.jpg" data-base="tgbot-2" alt="Пример генерации в @GPT4Telegrambot — Аниме / Манхва семи-реализм" onerror="resolveImage(this)" />
+                  <div class="absolute top-2.5 right-2.5 z-10 w-8 h-8 rounded-lg bg-black/70 border border-white/15 text-white flex items-center justify-center pointer-events-none">
+                    <svg class="w-4 h-4 text-brand-red" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"/>
+                    </svg>
+                  </div>
+                </div>
+                <div class="p-3.5 bg-brand-cardAlt border-t border-brand-border">
+                  <span class="text-[11px] font-bold text-brand-red uppercase tracking-wider block">Пример #2 • @GPT4Telegrambot</span>
+                  <p class="text-xs sm:text-sm font-medium text-gray-200 mt-0.5">Стилизация в духе аниме / манхва семи-реализма (формат 3:4)</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ==========================================
+         ЛАЙФХАКИ И БАЗОВЫЕ ШАБЛОНЫ ПРОМПТОВ
+         ========================================== -->
+    <section id="lifehacks" class="py-8 sm:py-10 scroll-mt-20">
+      <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="bg-brand-card border border-brand-border rounded-2xl p-5 sm:p-8 space-y-7">
+          
+          <div class="border-b border-brand-border pb-5">
+            <div class="text-xs font-bold uppercase tracking-widest text-brand-red mb-1">Мои секреты и структура запроса</div>
+            <h2 class="text-xl sm:text-3xl font-extrabold text-white">Лайфхаки и базовые шаблоны промптов</h2>
+          </div>
+
+          <!-- 4 карточки с лайфхаками -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="bg-brand-cardAlt border border-brand-border rounded-xl p-5 space-y-2">
+              <div class="text-brand-red font-bold text-sm uppercase tracking-wider">1. Конкретная анатомия лица</div>
+              <p class="text-gray-300 text-sm leading-relaxed">
+                Не пиши просто «красивый парень» или «милая девушка» — нейросеть выдаст шаблонное лицо. Указывай конкретику: <em>острые скулы, миндалевидные глаза с поволокой, прямой нос, чёткая линия челюсти, лёгкие веснушки на переносице</em>.
+              </p>
+            </div>
+            <div class="bg-brand-cardAlt border border-brand-border rounded-xl p-5 space-y-2">
+              <div class="text-brand-red font-bold text-sm uppercase tracking-wider">2. Фраза против «хмурых бровей»</div>
+              <p class="text-gray-300 text-sm leading-relaxed">
+                ИИ очень любит делать мужским персонажам слишком агрессивные, нахмуренные лица. Чтобы лицо выглядело живым и притягательным, добавляй в промпт: <strong class="text-white">«не хмурится, брови расслаблены, естественная спокойная эмоция»</strong>.
+              </p>
+            </div>
+            <div class="bg-brand-cardAlt border border-brand-border rounded-xl p-5 space-y-2">
+              <div class="text-brand-red font-bold text-sm uppercase tracking-wider">3. Контрастный свет = объём</div>
+              <p class="text-gray-300 text-sm leading-relaxed">
+                Плоский дневной свет делает арт скучным. Всегда задавай два источника или драматичное освещение: <em>тёплый закатный контровой свет по контуру волос, глубокие мягкие тени на половине лица, холодный неоновый рефлекс</em>.
+              </p>
+            </div>
+            <div class="bg-brand-cardAlt border border-brand-border rounded-xl p-5 space-y-2">
+              <div class="text-brand-red font-bold text-sm uppercase tracking-wider">4. Указывай стиль и формат 3:4</div>
+              <p class="text-gray-300 text-sm leading-relaxed">
+                В самом начале запроса пиши <strong class="text-white">«Создай изображение в формате 3:4»</strong> и задавай стиль: <em>полуреализм (semi-realism), цифровая живопись с видимыми мазками, дарк-фэнтези или кинематографичный портрет</em>.
+              </p>
+            </div>
+          </div>
+
+          <!-- Базовые шаблоны для копирования -->
+          <div class="space-y-5 pt-2">
+            <div>
+              <h3 class="text-base sm:text-lg font-bold text-white mb-1">Базовые стартовые шаблоны (на русском языке)</h3>
+              <p class="text-xs sm:text-sm text-gray-400">Подставь свои значения вместо текста в квадратных скобках <code class="text-gray-200">[...]</code> и нажми кнопку копирования.</p>
+            </div>
+
+            <!-- Шаблон 1 -->
+            <div class="bg-brand-black border border-brand-border rounded-xl p-4 sm:p-5 space-y-3">
+              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+                <span class="text-xs font-bold uppercase tracking-wider text-brand-red">Шаблон #1 • Портрет персонажа (Универсальный)</span>
+                <button onclick="copyPrompt('prompt-template-1', this)" class="self-start sm:self-auto px-3.5 py-2 rounded-lg bg-white/5 hover:bg-brand-red text-gray-200 hover:text-white border border-brand-border hover:border-brand-red text-xs font-semibold transition flex items-center gap-1.5">
+                  <svg class="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                  </svg>
+                  <span>Скопировать шаблон</span>
+                </button>
+              </div>
+              <pre id="prompt-template-1" class="text-xs sm:text-sm text-gray-300 whitespace-pre-wrap break-words font-mono leading-relaxed bg-brand-card/70 p-3.5 sm:p-4 rounded-lg border border-brand-border/60">Создай изображение в формате 3:4, стиль — детализированный полуреализм (semi-realism). На портрете по пояс изображён [возраст и пол/тип персонажа], [причёска, цвет и длина волос]. Черты лица: [форма скул и челюсти], [разрез и цвет глаз], [форма носа и губ], [особые приметы: веснушки / шрам / родинка]. Выражение лица: [спокойная полуулыбка / задумчивый взгляд], не хмурится, естественная эмоция. Одет в [описание одежды и аксессуаров]. Фон: [описание локации и времени суток]. Освещение: кинематографичный контрастный свет, [тёплый закатный контровой свет по контуру волос / неоновые блики], глубокие мягкие тени на лице, высокая детализация кожи и прядей волос.</pre>
+            </div>
+
+            <!-- Шаблон 2 -->
+            <div class="bg-brand-black border border-brand-border rounded-xl p-4 sm:p-5 space-y-3">
+              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+                <span class="text-xs font-bold uppercase tracking-wider text-brand-red">Шаблон #2 • Атмосферная сцена с персонажем</span>
+                <button onclick="copyPrompt('prompt-template-2', this)" class="self-start sm:self-auto px-3.5 py-2 rounded-lg bg-white/5 hover:bg-brand-red text-gray-200 hover:text-white border border-brand-border hover:border-brand-red text-xs font-semibold transition flex items-center gap-1.5">
+                  <svg class="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                  </svg>
+                  <span>Скопировать шаблон</span>
+                </button>
+              </div>
+              <pre id="prompt-template-2" class="text-xs sm:text-sm text-gray-300 whitespace-pre-wrap break-words font-mono leading-relaxed bg-brand-card/70 p-3.5 sm:p-4 rounded-lg border border-brand-border/60">Создай изображение в формате 3:4, художественный полуреализм с мягкой текстурой мазков. В кадре [описание персонажа, его поза и действие, например: сидит на крыше / держит в руках предмет]. Лицо: [чёткие скулы, форма глаз и цвет радужки, форма губ], не хмурится, естественная живая эмоция, взгляд направлен в камеру. Волосы: [цвет и текстура волос, лёгкое движение от ветра]. Одежда: [детали костюма, фактура ткани]. Атмосфера и свет: [закатное небо / сумерки / туман], выразительный контровой свет, тёплые блики на коже и контрастные глубокие тени.</pre>
+            </div>
+
+            <!-- Плашка с прямой ссылкой на бота-помощника -->
+            <div class="rounded-xl bg-brand-red/10 border border-brand-red/30 p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div class="space-y-1">
+                <div class="text-sm font-bold text-white">Хочешь сложный профессиональный промпт под своего персонажа?</div>
+                <p class="text-xs sm:text-sm text-gray-300">
+                  Эти шаблоны — базовая основа. А чтобы получить детальный промпт с ювелирной настройкой света, ракурса и стиля (на русском или английском), открой моего <strong class="text-white">бота-помощника</strong>!
+                </p>
+              </div>
+              <a href="https://frendi.ai/chat/assistent-matiss-ai-art-prompts-design-2" target="_blank" rel="noopener noreferrer" class="flex-shrink-0 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-brand-red hover:bg-brand-redHover text-white text-xs sm:text-sm font-bold transition">
+                <span>Открыть бота-помощника</span>
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
+                </svg>
+              </a>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Футер -->
+  <footer class="border-t border-brand-border bg-brand-black/95 py-10 mt-8">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-6">
+      <div class="flex items-center gap-3">
+        <div class="w-8 h-8 rounded-lg bg-brand-red flex items-center justify-center text-white font-black text-sm">M</div>
+        <div>
+          <div class="text-sm font-bold text-white">Матти (matovya)</div>
+          <div class="text-xs text-gray-500">Гайд по генерации изображений и видео для ботов</div>
+        </div>
+      </div>
+
+      <div class="flex flex-wrap items-center justify-center gap-4 text-xs sm:text-sm font-medium text-gray-400">
+        <a href="https://frendi.ai/chat/assistent-matiss-ai-art-prompts-design-2" target="_blank" rel="noopener noreferrer" class="hover:text-white transition">Бот-помощник</a>
+        <span class="text-gray-700">•</span>
+        <a href="https://matovyaa.github.io/gaid-sozdanie-botov/" target="_blank" rel="noopener noreferrer" class="hover:text-white transition">Гайды по созданию ботов</a>
+        <span class="text-gray-700">•</span>
+        <a href="https://t.me/matovya_creator" target="_blank" rel="noopener noreferrer" class="hover:text-white transition">ТГ канал «Хрущёвка»</a>
+        <span class="text-gray-700">•</span>
+        <a href="https://frendi.ai/user/455adeea-33b7-44a2-a640-89bff5eefd20" target="_blank" rel="noopener noreferrer" class="text-brand-red hover:underline font-semibold">Профиль на Frendi.ai</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Кнопка «Наверх» -->
+  <button id="back-to-top" onclick="scrollToSection(event, 'top')" aria-label="Наверх" class="fixed bottom-5 right-5 z-40 w-11 h-11 rounded-xl bg-brand-red hover:bg-brand-redHover text-white shadow-lg flex items-center justify-center transition-all duration-200 opacity-0 translate-y-4 pointer-events-none">
+    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 15l7-7 7 7"/>
+    </svg>
+  </button>
+
+  <!-- Модальное окно Lightbox для просмотра картинок на весь экран -->
+  <div id="lightbox" class="fixed inset-0 z-[70] bg-black/95 backdrop-blur-md hidden items-center justify-center p-3 sm:p-6" onclick="closeLightbox(event)">
+    <!-- Фиксированная заметная кнопка закрытия в углу экрана -->
+    <button onclick="closeLightbox(event, true)" aria-label="Закрыть" class="fixed top-4 right-4 z-[80] w-11 h-11 rounded-full bg-brand-card/90 border border-white/25 text-white hover:bg-brand-red transition flex items-center justify-center shadow-xl">
+      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+      </svg>
+    </button>
+
+    <div class="relative max-w-5xl w-full max-h-[90vh] flex flex-col items-center justify-center">
+      <img id="lightbox-img" src="" alt="" class="max-h-[80vh] max-w-full object-contain rounded-xl border border-brand-border shadow-2xl bg-[#0d0d0d]" />
+      <p id="lightbox-caption" class="text-xs sm:text-sm text-gray-200 mt-3 text-center font-medium px-4"></p>
+      <span class="text-[11px] text-gray-500 mt-1">Нажми в любом свободном месте или «✕», чтобы закрыть</span>
+    </div>
+  </div>
+
+  <!-- Скрипты -->
+  <script>
+    // 1. Умный авто-подбор расширений картинок (.jpg -> .jpeg -> .png -> .webp -> .JPG -> .PNG)
+    const EXTENSIONS_TO_TRY = ['.jpeg', '.png', '.webp', '.JPG', '.JPEG', '.PNG'];
+
+    function resolveImage(imgElement) {
+      const baseName = imgElement.getAttribute('data-base');
+      if (!baseName) return;
+
+      let step = parseInt(imgElement.getAttribute('data-ext-step') || '0', 10);
+
+      if (step < EXTENSIONS_TO_TRY.length) {
+        imgElement.setAttribute('data-ext-step', String(step + 1));
+        imgElement.src = baseName + EXTENSIONS_TO_TRY[step];
+      } else {
+        imgElement.onerror = null;
+        const svgPlaceholder = `<svg xmlns="http://www.w3.org/2000/svg" width="800" height="800" viewBox="0 0 800 800">
+          <rect width="100%" height="100%" fill="#141414"/>
+          <rect x="40" y="40" width="720" height="720" rx="24" fill="none" stroke="#2a2a2a" stroke-width="4" stroke-dasharray="12 12"/>
+          <text x="50%" y="46%" fill="#E50914" font-family="sans-serif" font-weight="bold" font-size="28" text-anchor="middle">Файл ${baseName}.jpg</text>
+          <text x="50%" y="54%" fill="#9ca3af" font-family="sans-serif" font-size="20" text-anchor="middle">Положите картинку в одну папку с index.html</text>
+        </svg>`;
+        imgElement.src = 'data:image/svg+xml;utf8,' + encodeURIComponent(svgPlaceholder);
+      }
+    }
+
+    // 2. Мобильное меню
+    const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+    const mobileMenu = document.getElementById('mobile-menu');
+    const iconOpen = document.getElementById('menu-icon-open');
+    const iconClose = document.getElementById('menu-icon-close');
+
+    mobileMenuBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const isHidden = mobileMenu.classList.contains('hidden');
+      if (isHidden) {
+        mobileMenu.classList.remove('hidden');
+        iconOpen.classList.add('hidden');
+        iconClose.classList.remove('hidden');
+      } else {
+        closeMobileMenu();
+      }
+    });
+
+    function closeMobileMenu() {
+      mobileMenu.classList.add('hidden');
+      iconOpen.classList.remove('hidden');
+      iconClose.classList.add('hidden');
+    }
+
+    document.addEventListener('click', (e) => {
+      if (!mobileMenu.classList.contains('hidden') && !mobileMenu.contains(e.target) && !mobileMenuBtn.contains(e.target)) {
+        closeMobileMenu();
+      }
+    });
+
+    // 3. Плавный скролл внутри страницы
+    function scrollToSection(event, id) {
+      if (event) event.preventDefault();
+      if (id === 'top') {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        return;
+      }
+      const target = document.getElementById(id);
+      if (target) {
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }
+
+    // 4. Полоса прогресса чтения и кнопка «Наверх»
+    const progressBar = document.getElementById('reading-progress');
+    const backToTopBtn = document.getElementById('back-to-top');
+
+    window.addEventListener('scroll', () => {
+      const scrollTop = window.scrollY || document.documentElement.scrollTop;
+      const docHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+      const progress = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+      progressBar.style.width = progress + '%';
+
+      if (scrollTop > 400) {
+        backToTopBtn.classList.remove('opacity-0', 'translate-y-4', 'pointer-events-none');
+      } else {
+        backToTopBtn.classList.add('opacity-0', 'translate-y-4', 'pointer-events-none');
+      }
+    }, { passive: true });
+
+    // 5. Копирование шаблона промпта
+    function copyPrompt(elementId, btn) {
+      const text = document.getElementById(elementId).innerText;
+      const span = btn.querySelector('span');
+      const originalText = span.innerText;
+
+      const showCopied = () => {
+        span.innerText = 'Скопировано!';
+        btn.classList.add('bg-brand-red', 'text-white', 'border-brand-red');
+        setTimeout(() => {
+          span.innerText = originalText;
+          btn.classList.remove('bg-brand-red', 'text-white', 'border-brand-red');
+        }, 2000);
+      };
+
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(showCopied).catch(() => fallbackCopy(text, showCopied));
+      } else {
+        fallbackCopy(text, showCopied);
+      }
+    }
+
+    function fallbackCopy(text, callback) {
+      const textarea = document.createElement('textarea');
+      textarea.value = text;
+      textarea.style.position = 'fixed';
+      textarea.style.opacity = '0';
+      document.body.appendChild(textarea);
+      textarea.select();
+      try {
+        document.execCommand('copy');
+        callback();
+      } catch (e) {}
+      document.body.removeChild(textarea);
+    }
+
+    // 6. Надёжный Lightbox: берёт реально загруженный src прямо из карточки
+    const lightbox = document.getElementById('lightbox');
+    const lightboxImg = document.getElementById('lightbox-img');
+    const lightboxCaption = document.getElementById('lightbox-caption');
+
+    function openLightboxFromBox(containerEl, caption) {
+      const img = containerEl.querySelector('img:not([aria-hidden="true"])') || containerEl.querySelector('img');
+      if (!img) return;
+
+      const actualSrc = img.currentSrc || img.src;
+      lightboxImg.src = actualSrc;
+      lightboxImg.alt = caption || img.alt || '';
+      lightboxCaption.innerText = caption || img.alt || '';
+      lightbox.classList.remove('hidden');
+      lightbox.classList.add('flex');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeLightbox(event, force = false) {
+      if (force || event.target === lightbox || event.target.parentElement === lightbox) {
+        lightbox.classList.add('hidden');
+        lightbox.classList.remove('flex');
+        lightboxImg.src = '';
+        document.body.style.overflow = '';
+      }
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && !lightbox.classList.contains('hidden')) {
+        closeLightbox(e, true);
+      }
+    });
+  </script>
+</body>
+</html>
